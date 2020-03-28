@@ -60,6 +60,8 @@ async def fact(ctx):
 
 @client.command()
 async def email(ctx, recemail, *message):
+    if recemail == "" or message == "":
+        await ctx.send("I need to know who/what to send!")
     sendmsg = " ".join(message)
     await ctx.send(f"Sending '{sendmsg}' to '{recemail}'")
     msg = MIMEMultipart("alternative")
