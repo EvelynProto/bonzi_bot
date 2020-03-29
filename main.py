@@ -87,4 +87,4 @@ async def help(ctx):
         msg.add_field(name=command,value=description, inline=False)
     await ctx.send("", embed=msg)
 
-client.run("NjkyNTA5ODQ2NDk0MjQ5MDIw.Xnvk7Q.dWLGUbPwrFumwDpZ3gp_7Z3pizo")
+client.run("hah no")
