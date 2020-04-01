@@ -3,6 +3,7 @@ from discord.ext import commands, tasks
 from itertools import cycle
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from datetime import datetime
 
 prefix = "Bonzi, "
 client = commands.Bot(command_prefix = prefix)
@@ -21,19 +22,16 @@ client.remove_command("help")
 @client.event
 async def on_ready():
     change_status.start()
-    print(f"Bot logged in.")
-
-@client.event
-async def on_member_join(member):
-    print(f"{member} joined the server.")
-
-@client.event
-async def on_member_remove(member):
-    print(f"{member} left the server.")
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: Bot logged in.")
 
 @client.command()
 async def ping(ctx):
-    await ctx.send(f"Current ping: {round(client.latency*1000)}ms")
+    await ctx.send(f"Current ping: {round(client.latency*1000)}ms",tts=True)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}ping")
 
 @tasks.loop(seconds=15)
 async def change_status():
@@ -44,26 +42,35 @@ async def change_status():
 @commands.has_permissions(manage_messages=True)
 async def clear(ctx, amount=10):
     await ctx.channel.purge(limit=amount)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}clear")
 
 @client.command()
 async def joke(ctx):
     selectedQuestion = random.randint(0,29)*2
     question = jokes[selectedQuestion]
     answer = jokes[selectedQuestion+1]
-    await ctx.send(question)
+    await ctx.send(question,tts=True)
     time.sleep(2)
-    await ctx.send(answer)
+    await ctx.send(answer,tts=True)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}joke")
 
 @client.command()
 async def fact(ctx):
-    await ctx.send(random.choice(facts))
+    await ctx.send(random.choice(facts),tts=True)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}fact")
 
 @client.command()
 async def email(ctx, recemail, *message):
     if recemail == "" or message == "":
-        await ctx.send("I need to know who/what to send!")
+        await ctx.send("I need to know who/what to send!",tts=True)
     sendmsg = " ".join(message)
-    await ctx.send(f"Sending '{sendmsg}' to '{recemail}'")
+    await ctx.send(f"Sending '{sendmsg}' to '{recemail}'", tts=True)
     msg = MIMEMultipart("alternative")
     msg["Subject"] = f"A message from {ctx.author}"
     content = MIMEText(f"{ctx.author} on Discord says: {sendmsg}", "plain")
@@ -75,6 +82,9 @@ async def email(ctx, recemail, *message):
     with smtplib.SMTP_SSL("smtp.gmail.com", port, context=context) as server:
         server.login(sendemail, password)
         server.sendmail(sendemail,recemail,msg.as_string())
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}email")
 
 @client.command()
 async def help(ctx):
@@ -82,9 +92,26 @@ async def help(ctx):
     commands["joke"]="Gives a random joke!"
     commands["fact"]="Gives a random fact!"
     commands["email [email] [message]"]="Sends an email to [email] containing [message]"
+    commands["say [text]"]="Says whatever is in [text]!"
     msg=discord.Embed(title='Bonzi Bot', description="Written by JezzaR The Protogen#6483 using Discord.py",color=0x543A77)
     for command,description in commands.items():
         msg.add_field(name=command,value=description, inline=False)
     await ctx.send("", embed=msg)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}help")
 
-client.run("hah no")
+@client.command()
+async def say(ctx, *args):
+    saying = ""
+    for x in args:
+        saying += f" {x}"
+    saying = saying.replace("*","")
+    saying = saying.replace("~~","")
+    saying = saying.replace("_","")
+    await ctx.send(saying,tts = True)
+    with open("main.log", "a") as myfile:
+        currentTime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        myfile.write(f"[{currentTime}]: {ctx.author} sent {prefix}say saying {saying}")
+
+client.run("lmao imagine if i left this here")
